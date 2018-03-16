@@ -119,7 +119,18 @@ void listFile()
 	cout << "--------" << endl;
 	
 	for(int i = (viewAll) ? 0 : files.size() - 7; i < files.size(); i++)
-		cout << files[i] << endl;
+	{
+		cout << "\033[100m";
+		if ( files.size() - i <= 3 )
+			cout << "\033[93m" << files[i] << "   <<  " << files.size() - i << "\033[0m" <<endl;
+		else if (files.size() - i == 5 || files.size() - i == 6)
+			cout << "\033[1;93m" << files[i] << "   <<  " << files.size() - i << "\033[0m" <<endl;
+		else
+			cout << files[i] << "   <<  " << files.size() - i << "\033[0m"<<endl;
+		
+		cout << "\033[0m";
+	}
+	
 	cout << "--------" << endl << endl;
 	closedir(dpdf);
 }
