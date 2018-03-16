@@ -33,12 +33,12 @@ int main(){
 	selectFile();
 	
 	fstream ifs, ofs;//(fileName, fstream::in | fstream::out);
-	ifs.open(fileName, fstream::in | fstream::out | fstream::app);
+	ifs.open(fileName, fstream::in/* | fstream::out | fstream::app*/);
 	
 	if(!ifs)
 	{
 		cout << "Cant open" << endl;
-		ifs.open(fileName, fstream::in | fstream::out | fstream::trunc);
+		ifs.open(fileName, fstream::in/* | fstream::out | fstream::trunc*/);
 		ifs << "\n";
 		ifs.close();
 	}
