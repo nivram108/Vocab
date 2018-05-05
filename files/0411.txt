@@ -1,0 +1,3 @@
+parry 1
+pathological 1
+persiflage 1

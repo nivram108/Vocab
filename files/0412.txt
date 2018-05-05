@@ -1,0 +1,17 @@
+petty 0
+philanthropic 0
+philistine 0
+phlegmatic 0
+pigment 0
+plumb 0
+plummet 0
+pompous 0
+prevade 0
+piddling 1
+placate 1
+pillory 2
+piquant 2
+plangent 2
+pleat 2
+petition 3
+plump 3

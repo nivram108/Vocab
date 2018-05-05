@@ -6,23 +6,29 @@
 #include <cstdlib> 
 using namespace std;
 
-string fileName = "vocab.txt";
+string tmpFileName = "vocab.txt";
+string tmpFilePath = "tmp";
+string historyFilePath = "history";
+string historyFileName = "";
+
+vector<string> tmpVocab, historyVocab;
+vector<int> tmpWeight, historyWeight;
 
 void listFile();
 void selectFile();
 
-void addVocab(vector<string> &vocab, vector<int> &weight);
-void addVocabDirectly(vector<string> &vocab, vector<int> &weight, string v);
-void answer(vector<string> &vocab,vector<int> &weight);
-void recorrect(vector<string> &vocab);
-void deleteVocab(vector<string> &vocab, vector<int> &weight);
-void sortVocabMap(vector<string> &vocab, vector<int> &weight);
+void addVocab();
+void addVocabDirectly(string v);
+void answer();
+void recorrect();
+void deleteVocab();
+void sortVocabMap();
 
-void printData(vector<string> &vocab, vector<int> &weight);
-void printFullData(vector<string> &vocab, vector<int> &weight);
+void printData();
+void printFullData();
 void printCmd();
 
-void saveFile(vector<string> &vocab, vector<int> &weight);
+void saveFile();
 bool stringCompareLessThan(string stringLeft, string stringRight);
 
 
@@ -32,27 +38,32 @@ int main(){
 	listFile();
 	selectFile();
 	
-	fstream ifs, ofs;//(fileName, fstream::in | fstream::out);
-	ifs.open(fileName, fstream::in/* | fstream::out | fstream::app*/);
+	fstream iTmpFile, oTmpFile;//(tmpFileName, fstream::in | fstream::out);
+	fstream iHistoryFile, oHistoryFile;
 	
-	if(!ifs)
-	{
-		cout << "Cant open" << endl;
-		ifs.open(fileName, fstream::in/* | fstream::out | fstream::trunc*/);
-		ifs << "\n";
-		ifs.close();
-	}
+	iTmpFile.open(tmpFileName, fstream::in/* | fstream::out | fstream::app*/);
+	iHistoryFile.open(historyFileName, fstream::in/* | fstream::out | fstream::app*/);
+
 	string cmd;
 	int w;
-	vector<string> vocab;// = new vector<string>();
-	vector<int> weight;// = new vector<int>();
-	while(ifs >> cmd)
+	cout << "LOAD" << endl;
+	cout << "file name : " << historyFileName << endl;
+	
+	while(iTmpFile >> cmd)
 	{
-		vocab.push_back(cmd);
-		ifs >> w;
-		weight.push_back(w);
+		tmpVocab.push_back(cmd);
+		iTmpFile >> w;
+		tmpWeight.push_back(w);
 	}
-	ifs.close();
+	iTmpFile.close();
+	
+	while(iHistoryFile >> cmd)
+	{
+		historyVocab.push_back(cmd);
+		iHistoryFile >> w;
+		historyWeight.push_back(w);
+	}
+	iHistoryFile.close();
 	
 	printCmd();
 	bool flag = false;
@@ -60,19 +71,19 @@ int main(){
 	{
 		
 		if (cmd == "add")
-			addVocab(vocab, weight);
+			addVocab();
 		
 		else if(cmd == "answer")
-			answer(vocab, weight);
+			answer();
 		
 		else if(cmd == "recorrect")
-			recorrect(vocab);
+			recorrect();
 		
 		else if (cmd == "delete")
-			deleteVocab(vocab, weight);
+			deleteVocab();
 		
 		else if(cmd == "ls")
-			printFullData(vocab, weight);
+			printFullData();
 		
 		else if (cmd == "cls")
 			cout << string(50, '\n');
@@ -81,16 +92,17 @@ int main(){
 			break;
 		
 		else 
-			addVocabDirectly(vocab, weight, cmd);
+			addVocabDirectly(cmd);
 		
-		printData(vocab, weight);		
+		printData();		
 		printCmd();
 	}
 	
-	sortVocabMap(vocab, weight);
-	saveFile(vocab, weight);
+	sortVocabMap();
+	saveFile();
 	return 0;
 }
+
 void listFile()
 {
 	string cmd;
@@ -105,10 +117,11 @@ void listFile()
 	
 	viewAll = (cmd[0] == 'Y' || cmd[0] == 'y') ? false : true;
 	
-	dpdf = opendir("./files");
+	dpdf = opendir(string("./" + tmpFilePath).c_str());
+	dpdf = opendir("./tmp");
 	if (dpdf != NULL){
 	   while (epdf = readdir(dpdf)){
-		  //printf("Filename: %s",epdf->d_name);
+		  //printf("tmpFileName: %s",epdf->d_name);
 		  files.push_back(string(epdf->d_name));
 		  //cout << epdf->d_name << endl;
 	   }
@@ -117,8 +130,8 @@ void listFile()
 		cout << "Can't open files dir "<<endl;
 	
 	cout << "--------" << endl;
-	
-	for(int i = (viewAll) ? 0 : files.size() - 7; i < files.size(); i++)
+	cout << "File Size:" << files.size() << endl;
+	for(int i = (viewAll) ? 0 : (files.size() < 7) ? 0 : files.size() - 7; i < files.size(); i++)
 	{
 		cout << "\033[100m";
 		if ( files.size() - i <= 3 )
@@ -138,35 +151,39 @@ void listFile()
 void selectFile()
 {
 	cout << "Select File:" << endl;
-	cin >> fileName;
-	cout << "file Name : " << fileName << endl;
+	cin >> tmpFileName;
+	cout << "file Name : " << tmpFileName << endl;
 	
-	if ( fileName.find(".txt") == string::npos)
+	if ( tmpFileName.find(".txt") == string::npos)
 	{
 		cout << "auto-corrected to file form" << endl;
-		fileName = fileName + ".txt";
+		tmpFileName = tmpFileName + ".txt";
 	}
 	
-	cout << "file Name : " << fileName << endl;
-	fileName = "files/" + fileName;
+	historyFileName = tmpFileName;
+	
+	cout << "file Name : " << tmpFileName << endl;
+	tmpFileName = tmpFilePath + "/" + tmpFileName;	
+	historyFileName = historyFilePath + "/" + historyFileName;
+	
 	return;
 }
 
-void addVocab(vector<string> &vocab, vector<int> &weight)
+void addVocab()
 {
 	int w = 0;
 	bool repeated = false;
 	string v;
 	
-	cout << "Input vocab :";
+	cout << "Input Vocab :";
 	cin >> v;
 	
-	for( int i = 0; i < vocab.size(); i++)
+	for( int i = 0; i < tmpVocab.size(); i++)
 	{
-		if( v == vocab[i])
+		if( v == tmpVocab[i])
 		{
-			weight[i]++;
-			w = weight[i];
+			tmpWeight[i]++;
+			w = tmpWeight[i];
 			repeated = true;
 			break;
 		}
@@ -174,14 +191,32 @@ void addVocab(vector<string> &vocab, vector<int> &weight)
 	
 	if ( repeated == false)
 	{
-		vocab.push_back(v);
-		weight.push_back(1);
+		tmpVocab.push_back(v);
+		tmpWeight.push_back(1);
 	}
+	
+	for( int i = 0; i < historyVocab.size(); i++)
+	{
+		if( v == historyVocab[i])
+		{
+			historyWeight[i]++;
+			w = historyWeight[i];
+			repeated = true;
+			break;
+		}
+	}
+	
+	if ( repeated == false)
+	{
+		historyVocab.push_back(v);
+		historyWeight.push_back(1);
+	}
+	
 	
 	cout << string(50, '\n');
 	
-	sortVocabMap(vocab, weight);
-	printData(vocab, weight);
+	sortVocabMap();
+	printData();
 	
 	if( repeated == false)
 	{
@@ -192,20 +227,20 @@ void addVocab(vector<string> &vocab, vector<int> &weight)
 		cout << v << " : " << w << endl;
 	}
 	
-	saveFile(vocab, weight);
+	saveFile();
 }
 
-void addVocabDirectly(vector<string> &vocab, vector<int> &weight, string v)
+void addVocabDirectly(string v)
 {
 	int w = 0;
 	bool repeated = false;
 	
-	for( int i = 0; i < vocab.size(); i++)
+	for( int i = 0; i < tmpVocab.size(); i++)
 	{
-		if( v == vocab[i])
+		if( v == tmpVocab[i])
 		{
-			weight[i]++;
-			w = weight[i];
+			tmpWeight[i]++;
+			w = tmpWeight[i];
 			repeated = true;
 			break;
 		}
@@ -213,14 +248,31 @@ void addVocabDirectly(vector<string> &vocab, vector<int> &weight, string v)
 	
 	if ( repeated == false)
 	{
-		vocab.push_back(v);
-		weight.push_back(1);
+		tmpVocab.push_back(v);
+		tmpWeight.push_back(1);
+	}
+	
+	for( int i = 0; i < historyVocab.size(); i++)
+	{
+		if( v == historyVocab[i])
+		{
+			historyWeight[i]++;
+			w = historyWeight[i];
+			repeated = true;
+			break;
+		}
+	}
+	
+	if ( repeated == false)
+	{
+		historyVocab.push_back(v);
+		historyWeight.push_back(1);
 	}
 	
 	cout << string(50, '\n');
 	
-	sortVocabMap(vocab, weight);
-	printData(vocab, weight);
+	sortVocabMap();
+	printData();
 	
 	if( repeated == false)
 	{
@@ -231,138 +283,196 @@ void addVocabDirectly(vector<string> &vocab, vector<int> &weight, string v)
 		cout << v << " : " << w << endl;
 	}
 	
-	saveFile(vocab, weight);
+	saveFile();
 }
 
-void answer(vector<string> &vocab, vector<int> &weight)
+void answer()
 {
 	string v;
 	int w;
-	cout << "Input vocab :";
+	cout << "Input Vocab :";
 	cin >> v;
 	if ( v == "exit")
 		return;
-	for( int i = 0; i < vocab.size(); i++)
+	for( int i = 0; i < tmpVocab.size(); i++)
 	{
-		if( v == vocab[i])
+		if( v == tmpVocab[i])
 		{
-			weight[i] = 0;
+			tmpWeight[i] = 0;
 			break;
 		}
 	}
-	saveFile(vocab, weight);
-	answer(vocab, weight);
+	saveFile();
+	answer();
 }
-void recorrect(vector<string> &vocab)
+
+void recorrect()
 {
 	string s0, s1;
-	cout << "The wrong vocab : ";
+	cout << "The wrong Vocab : ";
 	cin >> s0;
-	for(int i = 0; i < vocab.size(); i++)
+	for(int i = 0; i < tmpVocab.size(); i++)
 	{
-		if(vocab[i] == s0)
+		if(tmpVocab[i] == s0)
 		{
 			cout << "Correct to :";
 			cin >> s1;
-			vocab[i] = s1;
+			tmpVocab[i] = s1;
 		}
 	}
+	
+	for(int i = 0; i < historyVocab.size(); i++)
+	{
+		if(historyVocab[i] == s0)
+		{
+			historyVocab[i] = s1;
+		}
+	}
+	
+	saveFile();
 }
 
-void deleteVocab(vector<string> &vocab, vector<int> &weight)
+void deleteVocab()
 {
 	string s0, s1;
-	cout << "The wrong vocab : ";
+	cout << "The wrong Vocab : ";
 	cin >> s0;
-	for(int i = 0; i < vocab.size(); i++)
+	for(int i = 0; i < tmpVocab.size(); i++)
 	{
-		if(vocab[i] == s0)
+		if(tmpVocab[i] == s0)
 		{
-			vocab.erase(vocab.begin() + i);
-			weight.erase(weight.begin() + i);
+			tmpVocab.erase(tmpVocab.begin() + i);
+			tmpWeight.erase(tmpWeight.begin() + i);
 		}
 	}
-	saveFile(vocab, weight);
+	
+	for(int i = 0; i < historyVocab.size(); i++)
+	{
+		if(historyVocab[i] == s0)
+		{
+			historyVocab.erase(historyVocab.begin() + i);
+			historyWeight.erase(historyWeight.begin() + i);
+		}
+	}
+	
+	saveFile();
 }
 
 void printCmd()
 {
-	cout << "add : add a vocab" << endl;
-	cout << "answer : answer a vocab" << endl;
-	cout << "recorrect : recorrect the wrong input vocab" << endl;
-	cout << "delete : delete a vocab" << endl;
-	cout << "ls : list full vocab" << endl;
+	cout << "add : add a Vocab" << endl;
+	cout << "answer : answer a Vocab" << endl;
+	cout << "recorrect : recorrect the wrong input Vocab" << endl;
+	cout << "delete : delete a Vocab" << endl;
+	cout << "ls : list full Vocab" << endl;
 	cout << "exit : exit program" << endl;
 	cout << "cls : clean the screen" << endl;
 	cout << "Input a command:";
 }
 
 
-void sortVocabMap(vector<string> &vocab, vector<int> &weight)
+void sortVocabMap()
 {
-	for( int i = 0; i < weight.size(); i++)
+	for( int i = 0; i < tmpWeight.size(); i++)
 	{
-		for( int j = 0; j < weight.size() - 1; j++)
+		for( int j = 0; j < tmpWeight.size() - 1; j++)
 		{
 			int tmpw;
 			string tmpv;
-			if (stringCompareLessThan(vocab[i], vocab[j]) == true)
+			if (stringCompareLessThan(tmpVocab[i], tmpVocab[j]) == true)
 			{
-				tmpw = weight[i];
-				weight[i] = weight[j];
-				weight[j] = tmpw;
+				tmpw = tmpWeight[i];
+				tmpWeight[i] = tmpWeight[j];
+				tmpWeight[j] = tmpw;
 				
-				tmpv = vocab[i];
-				vocab[i] = vocab[j];
-				vocab[j] = tmpv;
+				tmpv = tmpVocab[i];
+				tmpVocab[i] = tmpVocab[j];
+				tmpVocab[j] = tmpv;
 			}
-			if(weight[i] < weight[j])
+			if(tmpWeight[i] < tmpWeight[j])
 			{
-				tmpw = weight[i];
-				weight[i] = weight[j];
-				weight[j] = tmpw;
+				tmpw = tmpWeight[i];
+				tmpWeight[i] = tmpWeight[j];
+				tmpWeight[j] = tmpw;
 				
-				tmpv = vocab[i];
-				vocab[i] = vocab[j];
-				vocab[j] = tmpv;
+				tmpv = tmpVocab[i];
+				tmpVocab[i] = tmpVocab[j];
+				tmpVocab[j] = tmpv;
+			}
+		}
+	}
+	
+	for( int i = 0; i < historyWeight.size(); i++)
+	{
+		for( int j = 0; j < historyWeight.size() - 1; j++)
+		{
+			int historyw;
+			string historyv;
+			if (stringCompareLessThan(historyVocab[i], historyVocab[j]) == true)
+			{
+				historyw = historyWeight[i];
+				historyWeight[i] = historyWeight[j];
+				historyWeight[j] = historyw;
+				
+				historyv = historyVocab[i];
+				historyVocab[i] = historyVocab[j];
+				historyVocab[j] = historyv;
+			}
+			if(historyWeight[i] < historyWeight[j])
+			{
+				historyw = historyWeight[i];
+				historyWeight[i] = historyWeight[j];
+				historyWeight[j] = historyw;
+				
+				historyv = historyVocab[i];
+				historyVocab[i] = historyVocab[j];
+				historyVocab[j] = historyv;
 			}
 		}
 	}
 	
 }
 
-void printData(vector<string> &vocab, vector<int> &weight)
+void printData()
 {
 	cout << "--------------------------------" << endl;
-		for( int i = 0; i < vocab.size(); i++)
+		for( int i = 0; i < tmpVocab.size(); i++)
 		{
-			if ( weight[i] == 0)
+			if ( tmpWeight[i] == 0)
 				continue;
-			cout << "| "<< vocab[i] << " : " << weight[i] << endl;
+			cout << "| "<< tmpVocab[i] << " : " << tmpWeight[i] << endl;
 		}
 	cout << "--------------------------------" << endl << endl;
 }
 
-void printFullData(vector<string> &vocab, vector<int> &weight)
+void printFullData()
 {
-	sortVocabMap(vocab, weight);
+	sortVocabMap();
 	cout << "--------------------------------" << endl;
-		for( int i = 0; i < vocab.size(); i++)
+		for( int i = 0; i < tmpVocab.size(); i++)
 		{
-			cout << "| "<< vocab[i] << " : " << weight[i] << endl;
+			cout << "| "<< tmpVocab[i] << " : " << tmpWeight[i] << endl;
 		}
 	cout << "--------------------------------" << endl << endl;
 }
 
-void saveFile(vector<string> &vocab, vector<int> &weight)
+void saveFile()
 {
-	ofstream ofs;
-	ofs.open(fileName, fstream::out);
-	for( int i = 0; i < vocab.size(); i++)
+	ofstream oTmpFile;
+	oTmpFile.open(tmpFileName, fstream::out);
+	for( int i = 0; i < tmpVocab.size(); i++)
 	{
-		ofs << vocab[i] << " " << weight[i] << endl;
+		oTmpFile << tmpVocab[i] << " " << tmpWeight[i] << endl;
 	}
-	ofs.close();
+	oTmpFile.close();
+	
+	ofstream oHistoryFile;
+	oHistoryFile.open(historyFileName, fstream::out);
+	for( int i = 0; i < historyVocab.size(); i++)
+	{
+		oHistoryFile << historyVocab[i] << " " << historyWeight[i] << endl;
+	}
+	oHistoryFile.close();
 }
 
 bool stringCompareLessThan(string stringLeft, string stringRight)

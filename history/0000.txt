@@ -1,0 +1,7 @@
+aaa 1
+b 1
+ex 1
+aa 2
+ba 2
+ab 3
+a 4
