@@ -1,0 +1,16 @@
+bracing 1
+cordon 1
+cynic 1
+diaphanous 1
+drab 1
+insolent 1
+lopsided 1
+miserly 1
+peeve 1
+penitent 1
+redeem 1
+rescind 1
+stoic 1
+plush 2
+ravel 2
+wobble 2

@@ -26,6 +26,7 @@ void sortVocabMap();
 
 void printData();
 void printFullData();
+void printFullHistoryData();
 void printCmd();
 
 void saveFile();
@@ -84,6 +85,8 @@ int main(){
 		
 		else if(cmd == "ls")
 			printFullData();
+		else if (cmd == "lsh")
+			printFullHistoryData();
 		
 		else if (cmd == "cls")
 			cout << string(50, '\n');
@@ -365,6 +368,7 @@ void printCmd()
 	cout << "recorrect : recorrect the wrong input Vocab" << endl;
 	cout << "delete : delete a Vocab" << endl;
 	cout << "ls : list full Vocab" << endl;
+	cout << "lsh : list history Vocab" << endl;
 	cout << "exit : exit program" << endl;
 	cout << "cls : clean the screen" << endl;
 	cout << "Input a command:";
@@ -452,6 +456,17 @@ void printFullData()
 		for( int i = 0; i < tmpVocab.size(); i++)
 		{
 			cout << "| "<< tmpVocab[i] << " : " << tmpWeight[i] << endl;
+		}
+	cout << "--------------------------------" << endl << endl;
+}
+
+void printFullHistoryData()
+{
+	sortVocabMap();
+	cout << "--------------------------------" << endl;
+		for( int i = 0; i < historyVocab.size(); i++)
+		{
+			cout << "| "<< historyVocab[i] << " : " << historyWeight[i] << endl;
 		}
 	cout << "--------------------------------" << endl << endl;
 }
