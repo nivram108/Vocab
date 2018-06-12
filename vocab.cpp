@@ -97,7 +97,7 @@ int main(){
 		else 
 			addVocabDirectly(cmd);
 		
-		printData();		
+		//printData();		
 		printCmd();
 	}
 	
@@ -216,7 +216,7 @@ void addVocab()
 	}
 	
 	
-	cout << string(50, '\n');
+	//cout << string(50, '\n');
 	
 	sortVocabMap();
 	printData();
@@ -272,7 +272,7 @@ void addVocabDirectly(string v)
 		historyWeight.push_back(1);
 	}
 	
-	cout << string(50, '\n');
+	//cout << string(50, '\n');
 	
 	sortVocabMap();
 	printData();
@@ -296,19 +296,25 @@ void answer()
 	cout << "Input Vocab :";
 	cin >> v;
 	if ( v == "exit")
-		return;
-	for( int i = 0; i < tmpVocab.size(); i++)
 	{
-		if( v == tmpVocab[i])
-		{
-			tmpWeight[i] = 0;
-			break;
-		}
+		printData();
+		return;
 	}
-	saveFile();
-	answer();
+	
+	else
+	{		
+		for( int i = 0; i < tmpVocab.size(); i++)
+		{
+			if( v == tmpVocab[i])
+			{
+				tmpWeight[i] = 0;
+				break;
+			}
+		}
+		saveFile();
+		answer();
+	}
 }
-
 void recorrect()
 {
 	string s0, s1;
@@ -439,34 +445,44 @@ void sortVocabMap()
 
 void printData()
 {
+	cout << string(50, '\n');
+	//sortVocabMap();
 	cout << "--------------------------------" << endl;
 		for( int i = 0; i < tmpVocab.size(); i++)
 		{
 			if ( tmpWeight[i] == 0)
 				continue;
-			cout << "| "<< tmpVocab[i] << " : " << tmpWeight[i] << endl;
+			else
+				cout << "| "<< tmpVocab[i] << " : " << tmpWeight[i] << endl;
 		}
 	cout << "--------------------------------" << endl << endl;
 }
 
 void printFullData()
 {
+	printData();
+	/*
+	cout << string(50, '\n');
 	sortVocabMap();
 	cout << "--------------------------------" << endl;
 		for( int i = 0; i < tmpVocab.size(); i++)
 		{
 			cout << "| "<< tmpVocab[i] << " : " << tmpWeight[i] << endl;
 		}
-	cout << "--------------------------------" << endl << endl;
+	cout << "--------------------------------" << endl << endl;*/
 }
 
 void printFullHistoryData()
 {
 	sortVocabMap();
+	cout << "Input Lowerbound:";
+	int lower_bound = 0;
+	cin >> lower_bound;
 	cout << "--------------------------------" << endl;
 		for( int i = 0; i < historyVocab.size(); i++)
 		{
-			cout << "| "<< historyVocab[i] << " : " << historyWeight[i] << endl;
+			if (historyWeight[i] >= lower_bound)
+				cout << "| "<< historyVocab[i] << " : " << historyWeight[i] << endl;
 		}
 	cout << "--------------------------------" << endl << endl;
 }
