@@ -23,6 +23,7 @@ void answer();
 void recorrect();
 void deleteVocab();
 void sortVocabMap();
+void loadHistory();
 
 void printData();
 void printFullData();
@@ -82,6 +83,8 @@ int main(){
 		
 		else if (cmd == "delete")
 			deleteVocab();
+		else if (cmd == "load")
+			loadHistory();
 		
 		else if(cmd == "ls")
 			printFullData();
@@ -373,6 +376,7 @@ void printCmd()
 	cout << "answer : answer a Vocab" << endl;
 	cout << "recorrect : recorrect the wrong input Vocab" << endl;
 	cout << "delete : delete a Vocab" << endl;
+	cout << "load : load history to tmp" << endl;
 	cout << "ls : list full Vocab" << endl;
 	cout << "lsh : list history Vocab" << endl;
 	cout << "exit : exit program" << endl;
@@ -441,6 +445,15 @@ void sortVocabMap()
 		}
 	}
 	
+}
+void loadHistory()
+{
+	for(int i = 0; i < historyVocab.size(); i++)
+	{
+		tmpVocab[i] = historyVocab[i];
+		tmpWeight[i] = historyWeight[i];
+	}
+	saveFile();
 }
 
 void printData()

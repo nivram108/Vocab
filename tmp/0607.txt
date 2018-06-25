@@ -5,7 +5,6 @@ curt 0
 cynic 0
 dabble 0
 dank 0
-dapper 0
 dappled 0
 daunt 0
 dawdle 0
@@ -14,11 +13,11 @@ debut 0
 decant 0
 decrepit 0
 defer 0
-defile 0
 defuse 0
 deject 0
-delve 0
+deliberate 0
 demolition 0
+demotic 0
 dent 0
 deplete 0
 depose 0
@@ -30,6 +29,7 @@ despotic 0
 desultory 0
 deter 0
 detour 0
-detract 0
-deliberate 1
-demotic 1
+defile 3
+delve 3
+detract 3
+dapper 4
